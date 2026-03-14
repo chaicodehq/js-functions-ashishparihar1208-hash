@@ -49,5 +49,63 @@
  *   mgr.getUpcoming("2025-01-01", 1); // => [{ name: "Republic Day", ... }]
  */
 export function createFestivalManager() {
-  // Your code here
+  const festivals = [];
+  const validTypes = new Set(["religious", "national", "cultural"]);
+
+  const isValidDate = (d) => {
+    if (typeof d !== "string") return false;
+    const t = Date.parse(d);
+    return !Number.isNaN(t);
+  };
+
+  return {
+    addFestival(name, date, type) {
+      if (
+        !name ||
+        typeof name !== "string" ||
+        !isValidDate(date) ||
+        !validTypes.has(type)
+      ) {
+        return -1;
+      }
+
+      if (festivals.some(f => f.name === name)) return -1;
+
+      festivals.push({ name, date, type });
+      return festivals.length;
+    },
+
+    removeFestival(name) {
+      const idx = festivals.findIndex(f => f.name === name);
+      if (idx === -1) return false;
+      festivals.splice(idx, 1);
+      return true;
+    },
+
+    getAll() {
+      // return deep-ish copy of objects
+      return festivals.map(f => ({ ...f }));
+    },
+
+    getByType(type) {
+      return festivals
+        .filter(f => f.type === type)
+        .map(f => ({ ...f }));
+    },
+
+    getUpcoming(currentDate, n = 3) {
+      if (!isValidDate(currentDate)) return [];
+
+      return festivals
+        .filter(f => f.date >= currentDate)
+        .slice() // copy before sort
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .slice(0, n)
+        .map(f => ({ ...f }));
+    },
+
+    getCount() {
+      return festivals.length;
+    }
+  };
 }
